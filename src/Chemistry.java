@@ -78,13 +78,10 @@ public class Chemistry {
 			System.err.println("Error: input is invalid");
 			System.exit(3);
 		} 
+		
 		//Just in case
-		try {
-			assert formula != null;
-		} catch (Exception e) {
-			System.err.println("Error: Input has corrupted to null");
-			System.exit(4);
-		}
+		if (DEBUG)
+			assert formula != null: "Formula to process is null"; 
 			
 		//We need to remove parentheses in case they're nested
 		if (containsParentheses(formula))

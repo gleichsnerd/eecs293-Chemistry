@@ -21,5 +21,6 @@ Error-Handling architecture
 In the case of incorrect input, we throw an IllegalArgumentException
 
 -All input errors are stopped by helper methods before syntax checking begins (i.e. our barricade is before all data checking)
+	-Barricade consists of all "throwIf" functions and, for main, the empty argument check
 
 All in all, regex makes for some pretty secure code.
