@@ -78,14 +78,14 @@ public class Chemistry {
 			System.err.println("Error: input is invalid");
 			System.exit(3);
 		} 
-		
-		//Just in case
-		if (DEBUG)
-			assert formula != null: "Formula to process is null"; 
 			
 		//We need to remove parentheses in case they're nested
 		if (containsParentheses(formula))
 			formula = removeParentheses(formula);
+		
+		//Just in case
+		if (DEBUG)
+			assert !containsParentheses(formula): "Formula still has parentheses"; 
 		
 		//If our parentheses statements weren't invalid and we either have correct remaining formula
 		//or we've already processed everything
