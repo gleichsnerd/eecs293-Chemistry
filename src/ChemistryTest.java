@@ -37,6 +37,7 @@ public class ChemistryTest {
 		
 		assertFalse(Chemistry.isSyntaxCorrect("o5"));
 		assertFalse(Chemistry.isSyntaxCorrect("O1"));
+		assertFalse(Chemistry.isSyntaxCorrect("O1o"));
 		assertFalse(Chemistry.isSyntaxCorrect("O0"));
 		assertFalse(Chemistry.isSyntaxCorrect("H1H8"));
 		assertFalse(Chemistry.isSyntaxCorrect("L8RH8R0"));
@@ -47,7 +48,7 @@ public class ChemistryTest {
 	public void testParentheses(){
 		assertTrue(Chemistry.isSyntaxCorrect("(NaCl)2"));
 		assertTrue(Chemistry.isSyntaxCorrect("(Na2Cl)4"));
-		assertTrue(Chemistry.isSyntaxCorrect("(Na2Cl4)6"));
+		assertTrue(Chemistry.isSyntaxCorrect("(Na2Cl4)6OH"));
 		
 		assertFalse(Chemistry.isSyntaxCorrect("(NaCl"));
 		assertFalse(Chemistry.isSyntaxCorrect("Boo)"));
@@ -57,10 +58,12 @@ public class ChemistryTest {
 	@Test
 	public void testNestedParentheses(){
 		assertTrue(Chemistry.isSyntaxCorrect("((OH2)3Pr)4"));
+		assertTrue(Chemistry.isSyntaxCorrect("((OH2)3Pr)4LOL3"));
 		assertTrue(Chemistry.isSyntaxCorrect("((OH2)3(Hgg)4Pr)4"));
 		
 		assertFalse(Chemistry.isSyntaxCorrect("(((((((((((((WhOoPs)"));
 		assertFalse(Chemistry.isSyntaxCorrect("((NaCl)(Oh)2)2"));
+		
 	}
 
 	@Test
@@ -81,5 +84,16 @@ public class ChemistryTest {
 		} catch(IllegalArgumentException e) {};
 	}
 
+	@Test
+	public void testMain() {
+		String[] args = new String[0];
+		
+		try {
+			Chemistry.main(args);
+			fail("Exception should be thrown for empty args");
+		} catch(IllegalArgumentException e) {};
+		
+		args = new String[]{"NaCl", null, "H2O"};
+	}
 
 }

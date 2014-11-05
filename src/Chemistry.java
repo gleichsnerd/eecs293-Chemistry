@@ -7,6 +7,11 @@ import java.util.regex.Pattern;
  * @author Adam Gleichsner
  * Static class that checks a string for valid formula syntax,
  * but not valid chemistry.
+ * Error Codes:
+ * 1 - Null input
+ * 2 - Illegal number of arguments
+ * 3 - Illegal input
+ * 4 - Data corruption
  */
 public class Chemistry {
 
@@ -39,7 +44,7 @@ public class Chemistry {
 	private static final String CORRECT_SIMPLE_SYNTAX_PATTERN = "\\A([A-Z][a-z]{0,2}([2-9]|[1-9]+[0-9]+)*)+\\Z";
 	private static final String GENERIC_PARENTHESES_PATTERN = "\\(([A-z]*[0-9]*)+\\)\\d*";
 	private static final String CORRECT_PARENTHESES_PATTERN = "\\(([A-Z][a-z]{0,2}([2-9]|[1-9]+[0-9]+)*)+\\)([2-9]|[1-9]+[0-9]+)+";
-	
+	private static final boolean DEBUG = false;
 	/**
 	 * Public front of the checking process. Takes any String input and will
 	 * return "T" if valid and "F" if now. Mostly here in case the specs
@@ -48,7 +53,6 @@ public class Chemistry {
 	 * @return String - "T" if valid, "F" otherwise
 	 */
 	public static String checkSyntax(String formula) {
-		throwIfInputIsNull(formula);
 		//Declare as final for security, ya know
 		final String TRUE_OUTPUT = "T";
 		final String FALSE_OUTPUT = "F";
@@ -67,22 +71,46 @@ public class Chemistry {
 	 * @return boolean - true if syntactically valid, false otherwise
 	 */
 	public static boolean isSyntaxCorrect(String formula) {	
-		throwIfInputIsNull(formula);
-		throwIfInvalidString(formula);
-		
+		try {
+			throwIfInputIsNull(formula);
+			throwIfInvalidString(formula);
+		} catch (IllegalArgumentException e){
+			System.err.println("Error: input is invalid");
+			System.exit(3);
+		} 
+		//Just in case
+		try {
+			assert formula != null;
+		} catch (Exception e) {
+			System.err.println("Error: Input has corrupted to null");
+			System.exit(4);
+		}
+			
 		//We need to remove parentheses in case they're nested
 		if (containsParentheses(formula))
 			formula = removeParentheses(formula);
 		
 		//If our parentheses statements weren't invalid and we either have correct remaining formula
 		//or we've already processed everything
-		if (formula != null && (formula.matches(CORRECT_SIMPLE_SYNTAX_PATTERN) || formula.equals("")))
+		if (formulaIsCorrect(formula))
 			return true;
 		else
 			return false;
 	}
 	
 	//Private methods
+	
+	/**
+	 * Private helper that checks if the formula post processing is correct
+	 * @param formula
+	 * @return boolean - true if valid, false otherwise
+	 */
+	private static boolean formulaIsCorrect (String formula) {
+		if (formula != null && (formula.matches(CORRECT_SIMPLE_SYNTAX_PATTERN) || formula.equals("")))
+			return true;
+		else
+			return false;
+	}
 	
 	/**
 	 * Private helper to check if a formula contains parentheses to remove.
@@ -92,15 +120,17 @@ public class Chemistry {
 	 * @return boolean - true if parenthses found, false otherwise
 	 */
 	private static boolean containsParentheses (String formula) {
-		
 		//Create a pattern and matcher to check the string
 		Pattern p = Pattern.compile(GENERIC_PARENTHESES_PATTERN);
 		Matcher m = p.matcher(formula);
 
 		//If we find any parentheses, then we need to take them out
-		if(m.find()) 
+		if(m.find()) {
+			if (DEBUG)
+				System.out.println("Parentheses acknowledged. Prepare to remove all parentheses.");
 			return true;
-		return false;
+		} else
+			return false;
 	}
 	
 	/**
@@ -116,10 +146,14 @@ public class Chemistry {
 		
 		//While there is still a generic parenthesis case
 		while (m.find()) {
+			if(DEBUG)
+				System.out.println(m.group() + " was found as a parenthesis statement.");
 			//If it's correct, remove it
-			if(m.group().matches(CORRECT_PARENTHESES_PATTERN))
+			if(m.group().matches(CORRECT_PARENTHESES_PATTERN)) {
 				formula = formula.replace(m.group(), "");
-			else
+				if(DEBUG)
+					System.out.println(m.group() + " is a correct pattern. Modified formula is now " + formula);
+			} else
 				return null;
 			//Reset the matcher with the newly edited string
 			m = p.matcher(formula);
@@ -134,8 +168,6 @@ public class Chemistry {
 	 * @throws IllegalArgumentException
 	 */
 	private static void throwIfInvalidString(String formula) throws IllegalArgumentException{
-		throwIfInputIsNull(formula);
-		
 		if (formula.isEmpty())
 			throw new IllegalArgumentException("Error: input is empty string");
 		else {
@@ -167,16 +199,21 @@ public class Chemistry {
 	 * @throws IllegalArgumentException
 	 */
 	public static void main(String[] args) throws IllegalArgumentException {
-		throwIfInputIsNull((Object[])args);
+		try {
+			throwIfInputIsNull((Object[])args);
+		} catch (IllegalArgumentException e) {
+			System.err.println("Error: an argument is null");
+			System.exit(1);
+		}
 		
 		String checkedOut = " ";
-		if (args.length == 0)
-			throw new IllegalArgumentException("Error: invalid number of arguments");
-		else {
+		if (args.length == 0) {
+			System.err.println("Error: Invalid number of arguments");
+			System.exit(2);
+		} else {
 			for(String formula: args) {
-				
 				checkedOut = Chemistry.checkSyntax(formula);
-				System.out.print(formula + " : " + checkedOut);
+				System.out.println(formula + " : " + checkedOut);
 			}
 		}
 	}
